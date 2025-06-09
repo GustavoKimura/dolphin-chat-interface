@@ -65,7 +65,7 @@ if __name__ == "__main__":
     def warmup_model():
         print("[LOG] Doing warmup...")
         try:
-            messages = [{"role": "user", "content": "Olá, quem é você?"}]
+            messages = [{"role": "user", "content": "Doing warmup..."}]
             formatted_prompt = jinja_template.render(messages=messages)
 
             token_count = 0
