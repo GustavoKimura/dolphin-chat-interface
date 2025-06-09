@@ -21,6 +21,7 @@ llm = Llama(
     temperature=0.7,
     top_k=20,
     top_p=0.9,
+    chat_format="chatml",
     verbose=False,
 )
 
