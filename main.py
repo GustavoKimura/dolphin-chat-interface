@@ -1,19 +1,19 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, render_template, Response, stream_with_context
 from llama_cpp import Llama
 from jinja2 import Template
 from typing import cast, Dict, Any
+import os
+import json
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 with open("models/templates/custom.jinja", "r", encoding="utf-8") as f:
     jinja_template = Template(f.read())
 
-import os
-
 if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     llm = Llama(
         model_path="models/dolphin/dolphin.gguf",
-        n_ctx=512,
+        n_ctx=2048,
         n_threads=4,
         n_batch=64,
         n_threads_batch=4,
@@ -34,19 +34,23 @@ def index():
 def chat():
     data = request.get_json()
     user_input = data.get("prompt", "")
-
     messages = [{"role": "user", "content": user_input}]
-
     formatted_prompt = jinja_template.render(messages=messages)
 
-    response_text = ""
-    for chunk in llm(prompt=formatted_prompt, stop=["</s>"], echo=False, stream=True):
-        chunk_dict = cast(Dict[str, Any], chunk)
-        response_text += chunk_dict["choices"][0]["text"]
+    def generate():
+        for chunk in llm(
+            prompt=formatted_prompt,
+            echo=False,
+            stream=True,
+            max_tokens=512,
+        ):
+            chunk_dict = cast(Dict[str, Any], chunk)
+            token = chunk_dict["choices"][0]["text"]
+            yield f"data: {json.dumps({'token': token})}\n\n"
 
-    text = response_text.strip()
+        yield "data: [DONE]\n\n"
 
-    return jsonify({"response": text})
+    return Response(stream_with_context(generate()), mimetype="text/event-stream")
 
 
 if __name__ == "__main__":

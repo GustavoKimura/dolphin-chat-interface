@@ -2,7 +2,7 @@
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <title>Dolphin 3.0</title>
+    <title>🐬 Dolphin 3.0</title>
     <script
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
       defer
@@ -49,6 +49,13 @@
         padding: 1rem 2rem;
         width: 100%;
         margin: 0 auto;
+        width: 100%;
+        max-width: 700px;
+        -ms-overflow-style: none;
+      }
+
+      main::-webkit-scrollbar {
+        display: none;
       }
 
       .chat {
@@ -123,6 +130,43 @@
       button:hover {
         background-color: #1363be;
       }
+
+      .typing {
+        display: flex;
+        gap: 0.3rem;
+        align-items: center;
+        justify-content: flex-start;
+        font-size: 1.5rem;
+        color: #ccc;
+      }
+
+      .dot {
+        animation: blink 1.5s infinite;
+        width: 0.5rem;
+        height: 0.5rem;
+        background: #48cdff;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes blink {
+        0%,
+        80%,
+        100% {
+          opacity: 0.2;
+        }
+        40% {
+          opacity: 1;
+        }
+      }
     </style>
   </head>
   <body x-data="chatApp()">
@@ -139,6 +183,15 @@
             <div>
               <div class="user">Dolphin:</div>
               <div class="bubble" x-text="msg.response"></div>
+            </div>
+          </template>
+          <template
+            x-if="isGenerating && msg === messages[messages.length - 1]"
+          >
+            <div class="bubble bot typing">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
             </div>
           </template>
         </div>
@@ -163,27 +216,65 @@
         return {
           prompt: "",
           messages: [],
-          async sendMessage() {
+          isGenerating: false,
+          sendMessage() {
             const text = this.prompt.trim();
-            if (!text) return;
+            if (!text || this.isGenerating) return;
 
             const id = Date.now();
-            this.messages.push({ id, prompt: text, response: null });
+            const newMessage = { id, prompt: text, response: "" };
+            this.messages.push(newMessage);
             this.prompt = "";
+            this.isGenerating = true;
             this.scrollToBottom();
 
-            const res = await fetch("/chat", {
+            fetch("/chat", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ prompt: text }),
-            });
+            }).then((res) => {
+              const reader = res.body.getReader();
+              const decoder = new TextDecoder();
 
-            const data = await res.json();
-            const msg = this.messages.find((m) => m.id === id);
-            if (msg) {
-              msg.response = data.response;
-              this.scrollToBottom();
-            }
+              const read = () => {
+                reader.read().then(({ done, value }) => {
+                  if (done) {
+                    this.isGenerating = false;
+                    this.scrollToBottom();
+                    return;
+                  }
+
+                  const chunk = decoder.decode(value, { stream: true });
+                  const lines = chunk.split("\n");
+
+                  for (const line of lines) {
+                    if (line.startsWith("data: ")) {
+                      this.scrollToBottom();
+
+                      const payload = line.replace("data: ", "");
+                      if (payload === "[DONE]") {
+                        this.isGenerating = false;
+                        return;
+                      }
+
+                      try {
+                        const data = JSON.parse(payload);
+                        const msg = this.messages.find((m) => m.id === id);
+                        if (msg) {
+                          msg.response += data.token;
+                        }
+                      } catch (err) {
+                        console.error("Erro ao decodificar JSON:", err);
+                      }
+                    }
+                  }
+
+                  read();
+                });
+              };
+
+              read();
+            });
           },
           scrollToBottom() {
             this.$nextTick(() => {
