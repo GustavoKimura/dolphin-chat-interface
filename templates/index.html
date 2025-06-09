@@ -9,19 +9,46 @@
     ></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        padding: 2rem;
-        max-width: 700px;
-        margin: auto;
-        background: #121212;
-        color: #e0e0e0;
+      * {
+        box-sizing: border-box;
       }
 
-      h1 {
-        color: #48cdff;
-        margin-bottom: 2rem;
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: #121212;
+        color: #e0e0e0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        background: #121212;
+        padding: 1rem 2rem;
         text-align: center;
+        z-index: 10;
+      }
+
+      header h1 {
+        margin: 0;
+        color: #48cdff;
+      }
+
+      main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 2rem;
+        max-width: 700px;
+        margin: 0 auto;
       }
 
       .chat {
@@ -40,16 +67,31 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
         margin-top: 0.5rem;
         margin-bottom: 1rem;
+        width: 100%;
+        word-wrap: break-word;
+      }
+
+      footer {
+        position: sticky;
+        bottom: 0;
+        background: #121212;
+        padding: 1rem 0;
+        z-index: 10;
+        width: 100%;
+        display: flex;
+        justify-content: center;
       }
 
       form {
         display: flex;
-        flex-direction: column;
         gap: 0.5rem;
-        margin-top: 0.5rem;
+        width: 100%;
+        max-width: 700px;
+        padding: 0 1rem;
       }
 
       input[type="text"] {
+        flex: 1;
         background-color: #222;
         color: #fff;
         padding: 0.75rem 1rem;
@@ -66,28 +108,29 @@
       }
 
       button {
-        width: 100%;
         background-color: #137abe;
         color: #fff;
-        padding: 0.75rem 1.2rem;
+        padding: 0.75rem 1rem;
         border: none;
         border-radius: 8px;
         font-weight: bold;
+        font-size: 1rem;
         cursor: pointer;
         transition: background-color 0.3s;
-        font-size: 1rem;
+        white-space: nowrap;
       }
 
       button:hover {
         background-color: #1363be;
-        color: #fff;
       }
     </style>
   </head>
   <body x-data="chatApp()">
-    <h1>🐬 Asks Dolphin</h1>
+    <header>
+      <h1>🐬 Asks Dolphin</h1>
+    </header>
 
-    <div>
+    <main>
       <template x-for="msg in messages" :key="msg.id">
         <div class="chat">
           <div class="user">Você:</div>
@@ -100,16 +143,20 @@
           </template>
         </div>
       </template>
-    </div>
 
-    <form @submit.prevent="sendMessage">
-      <input
-        type="text"
-        x-model="prompt"
-        placeholder="Digite sua pergunta..."
-      />
-      <button type="submit">Enviar</button>
-    </form>
+      <div x-ref="bottomAnchor"></div>
+    </main>
+
+    <footer>
+      <form @submit.prevent="sendMessage">
+        <input
+          type="text"
+          x-model="prompt"
+          placeholder="How are you Dolphin?"
+        />
+        <button type="submit">Surf 🌊</button>
+      </form>
+    </footer>
 
     <script>
       function chatApp() {
@@ -123,6 +170,7 @@
             const id = Date.now();
             this.messages.push({ id, prompt: text, response: null });
             this.prompt = "";
+            this.scrollToBottom();
 
             const res = await fetch("/chat", {
               method: "POST",
@@ -132,7 +180,15 @@
 
             const data = await res.json();
             const msg = this.messages.find((m) => m.id === id);
-            if (msg) msg.response = data.response;
+            if (msg) {
+              msg.response = data.response;
+              this.scrollToBottom();
+            }
+          },
+          scrollToBottom() {
+            this.$nextTick(() => {
+              this.$refs.bottomAnchor?.scrollIntoView({ behavior: "smooth" });
+            });
           },
         };
       }
