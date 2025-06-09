@@ -11,16 +11,16 @@ with open("models/templates/custom.jinja", "r", encoding="utf-8") as f:
 
 llm = Llama(
     model_path="models/dolphin/dolphin.gguf",
-    n_ctx=2048,
+    n_ctx=4096,
     n_threads=os.cpu_count(),
     n_threads_batch=os.cpu_count(),
     n_batch=512,
-    n_ubatch=256,
+    n_ubatch=128,
     mlock=True,
-    repeat_penalty=1.0,
-    temperature=0.9,
+    repeat_penalty=1.15,
+    temperature=0.5,
     top_k=50,
-    top_p=1.0,
+    top_p=0.85,
     chat_format="chatml",
     stop=[],
     verbose=False,
@@ -88,4 +88,4 @@ if __name__ == "__main__":
 
     warmup_model()
 
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=8080, debug=True)
