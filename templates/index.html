@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chat LLaMA</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        max-width: 700px;
+        margin: auto;
+        background: #f9f9f9;
+      }
+      .chat {
+        margin-bottom: 1rem;
+      }
+      .user {
+        font-weight: bold;
+      }
+      .bot {
+        color: #333;
+        margin-left: 1rem;
+      }
+      .bubble {
+        background: #fff;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body x-data="chatApp()">
+    <h1>🧠 Chat com LLaMA</h1>
+
+    <div>
+      <template x-for="msg in messages" :key="msg.id">
+        <div class="chat">
+          <div class="user">Você:</div>
+          <div class="bubble" x-text="msg.prompt"></div>
+          <template x-if="msg.response">
+            <div>
+              <div class="user">LLaMA:</div>
+              <div class="bubble bot" x-text="msg.response"></div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <form @submit.prevent="sendMessage">
+      <input
+        type="text"
+        x-model="prompt"
+        placeholder="Digite sua pergunta..."
+        class="w-full p-2 border rounded"
+      />
+      <button
+        type="submit"
+        class="mt-2 px-4 py-2 bg-blue-600 text-white rounded"
+      >
+        Enviar
+      </button>
+    </form>
+
+    <script>
+      function chatApp() {
+        return {
+          prompt: "",
+          messages: [],
+          async sendMessage() {
+            const text = this.prompt.trim();
+            if (!text) return;
+
+            const id = Date.now();
+            this.messages.push({ id, prompt: text, response: null });
+            this.prompt = "";
+
+            const res = await fetch("/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt: text }),
+            });
+
+            const data = await res.json();
+            const msg = this.messages.find((m) => m.id === id);
+            if (msg) msg.response = data.response;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

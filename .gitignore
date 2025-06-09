@@ -1,0 +1,29 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# VSCode config
+.vscode/
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# Model files (grandes, não versionar)
+models/**/*.gguf
+
+# Templates compilados (se algum)
+*.jinja2c
+
+# Logs
+*.log
+
+# Jupyter (se usado)
+.ipynb_checkpoints/
+
+# Sistema
+.DS_Store
+Thumbs.db
