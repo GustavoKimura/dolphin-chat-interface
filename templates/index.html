@@ -2,7 +2,7 @@
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <title>Chat LLaMA</title>
+    <title>Dolphin 3.0</title>
     <script
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
       defer
@@ -10,33 +10,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       body {
-        font-family: sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         padding: 2rem;
         max-width: 700px;
         margin: auto;
-        background: #f9f9f9;
+        background: #121212;
+        color: #e0e0e0;
       }
+
+      h1 {
+        color: #48cdff;
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
       .chat {
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
       }
+
       .user {
         font-weight: bold;
+        color: #8be9fd;
       }
-      .bot {
-        color: #333;
-        margin-left: 1rem;
-      }
+
       .bubble {
-        background: #fff;
+        background: #1e1e1e;
         padding: 1rem;
         border-radius: 10px;
-        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
         margin-top: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      input[type="text"] {
+        background-color: #222;
+        color: #fff;
+        padding: 0.75rem 1rem;
+        border: 1px solid #444;
+        border-radius: 8px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input[type="text"]:focus {
+        border-color: #48cdff;
+        box-shadow: 0 0 5px #48cdff80;
+      }
+
+      button {
+        width: 100%;
+        background-color: #137abe;
+        color: #fff;
+        padding: 0.75rem 1.2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 1rem;
+      }
+
+      button:hover {
+        background-color: #1363be;
+        color: #fff;
       }
     </style>
   </head>
   <body x-data="chatApp()">
-    <h1>🧠 Chat com LLaMA</h1>
+    <h1>🐬 Asks Dolphin</h1>
 
     <div>
       <template x-for="msg in messages" :key="msg.id">
@@ -46,7 +95,7 @@
           <template x-if="msg.response">
             <div>
               <div class="user">LLaMA:</div>
-              <div class="bubble bot" x-text="msg.response"></div>
+              <div class="bubble" x-text="msg.response"></div>
             </div>
           </template>
         </div>
@@ -58,14 +107,8 @@
         type="text"
         x-model="prompt"
         placeholder="Digite sua pergunta..."
-        class="w-full p-2 border rounded"
       />
-      <button
-        type="submit"
-        class="mt-2 px-4 py-2 bg-blue-600 text-white rounded"
-      >
-        Enviar
-      </button>
+      <button type="submit">Enviar</button>
     </form>
 
     <script>
