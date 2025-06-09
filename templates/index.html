@@ -76,7 +76,8 @@
         margin-bottom: 1rem;
         width: 100%;
         word-wrap: break-word;
-        text-align: justify;
+        text-align: start;
+        font-size: 1rem;
       }
 
       footer {
@@ -172,7 +173,7 @@
   </head>
   <body x-data="chatApp()">
     <header>
-      <h1>🐬 Asks Dolphin</h1>
+      <h1>🐬 Dolphin 3.0</h1>
     </header>
 
     <main>
@@ -203,11 +204,7 @@
 
     <footer>
       <form @submit.prevent="sendMessage">
-        <input
-          type="text"
-          x-model="prompt"
-          placeholder="How are you Dolphin?"
-        />
+        <input type="text" x-model="prompt" placeholder="Ask me anything 🐬" />
         <button type="submit" :disabled="isGenerating">Ask 💬</button>
       </form>
     </footer>
