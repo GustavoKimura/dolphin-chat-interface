@@ -47,7 +47,7 @@
         flex: 1;
         overflow-y: auto;
         padding: 1rem 2rem;
-        max-width: 700px;
+        width: 100%;
         margin: 0 auto;
       }
 
@@ -133,11 +133,11 @@
     <main>
       <template x-for="msg in messages" :key="msg.id">
         <div class="chat">
-          <div class="user">Você:</div>
+          <div class="user">You:</div>
           <div class="bubble" x-text="msg.prompt"></div>
           <template x-if="msg.response">
             <div>
-              <div class="user">LLaMA:</div>
+              <div class="user">Dolphin:</div>
               <div class="bubble" x-text="msg.response"></div>
             </div>
           </template>
@@ -154,7 +154,7 @@
           x-model="prompt"
           placeholder="How are you Dolphin?"
         />
-        <button type="submit">Surf 🌊</button>
+        <button type="submit">Ask 💬</button>
       </form>
     </footer>
 
