@@ -17,11 +17,12 @@ llm = Llama(
     n_batch=512,
     n_ubatch=256,
     mlock=True,
-    repeat_penalty=1.1,
-    temperature=0.7,
-    top_k=20,
-    top_p=0.9,
+    repeat_penalty=1.0,
+    temperature=0.9,
+    top_k=50,
+    top_p=1.0,
     chat_format="chatml",
+    stop=[],
     verbose=False,
 )
 
@@ -36,7 +37,7 @@ def chat():
     data = request.get_json()
     user_input = data.get("prompt", "")
     messages = [{"role": "user", "content": user_input}]
-    formatted_prompt = jinja_template.render(messages=messages)
+    formatted_prompt = jinja_template.render(messages=messages).strip()
 
     def generate():
         start_time = time.time()
