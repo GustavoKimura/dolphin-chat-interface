@@ -1,29 +1,27 @@
+import os, json, time
+from typing import cast, Dict, Any
 from flask import Flask, request, render_template, Response, stream_with_context
 from llama_cpp import Llama
 from jinja2 import Template
-from typing import cast, Dict, Any
-import os
-import json
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 with open("models/templates/custom.jinja", "r", encoding="utf-8") as f:
     jinja_template = Template(f.read())
 
-if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-    llm = Llama(
-        model_path="models/dolphin/dolphin.gguf",
-        n_ctx=2048,
-        n_threads=4,
-        n_threads_batch=4,
-        n_batch=64,
-        n_ubatch=32,
-        mlock=True,
-        repeat_penalty=1.1,
-        temperature=0.7,
-        top_k=20,
-        top_p=0.9,
-    )
+llm = Llama(
+    model_path="models/dolphin/dolphin.gguf",
+    n_ctx=2048,
+    n_threads=os.cpu_count(),
+    n_threads_batch=os.cpu_count(),
+    n_batch=512,
+    n_ubatch=256,
+    mlock=True,
+    repeat_penalty=1.1,
+    temperature=0.7,
+    top_k=20,
+    top_p=0.9,
+)
 
 
 @app.route("/")
@@ -39,15 +37,26 @@ def chat():
     formatted_prompt = jinja_template.render(messages=messages)
 
     def generate():
+        start_time = time.time()
+        token_count = 0
+
         for chunk in llm(
             prompt=formatted_prompt,
             echo=False,
             stream=True,
-            max_tokens=512,
+            max_tokens=256,
         ):
             chunk_dict = cast(Dict[str, Any], chunk)
             token = chunk_dict["choices"][0]["text"]
+            token_count += 1
             yield f"data: {json.dumps({'token': token})}\n\n"
+
+        duration = time.time() - start_time
+        if duration > 0:
+            tps = token_count / duration
+            print(
+                f"[LOG] Generated tokens: {token_count} | Time: {duration:.2f}s | Speed: {tps:.2f} tokens/s"
+            )
 
         yield "data: [DONE]\n\n"
 
@@ -55,4 +64,4 @@ def chat():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=False)

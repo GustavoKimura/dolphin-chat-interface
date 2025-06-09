@@ -208,7 +208,7 @@
           x-model="prompt"
           placeholder="How are you Dolphin?"
         />
-        <button type="submit">Ask 💬</button>
+        <button type="submit" :disabled="isGenerating">Ask 💬</button>
       </form>
     </footer>
 
