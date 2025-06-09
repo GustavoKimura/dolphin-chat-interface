@@ -52,17 +52,38 @@ def chat():
             token_count += 1
             yield f"data: {json.dumps({'token': token})}\n\n"
 
-        duration = time.time() - start_time
-        if duration > 0:
-            tps = token_count / duration
-            print(
-                f"[LOG] Generated tokens: {token_count} | Time: {duration:.2f}s | Speed: {tps:.2f} tokens/s"
-            )
-
+        print(
+            f"[LOG] Generation complete: {token_count} tokens in {time.time() - start_time:.2f}s"
+        )
         yield "data: [DONE]\n\n"
 
     return Response(stream_with_context(generate()), mimetype="text/event-stream")
 
 
 if __name__ == "__main__":
+
+    def warmup_model():
+        print("[LOG] Doing warmup...")
+        try:
+            messages = [{"role": "user", "content": "Olá, quem é você?"}]
+            formatted_prompt = jinja_template.render(messages=messages)
+
+            token_count = 0
+            for chunk in llm(
+                prompt=formatted_prompt,
+                echo=False,
+                stream=True,
+                max_tokens=8,
+            ):
+                token_count += 1
+                if token_count >= 1:
+                    break
+
+            print("[LOG] Warmup complete.")
+
+        except Exception as e:
+            print(f"[LOG] Warmup error: {e}")
+
+    warmup_model()
+
     app.run(host="0.0.0.0", port=8080, debug=False)
