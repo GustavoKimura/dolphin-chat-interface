@@ -16,7 +16,7 @@ if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         n_ctx=2048,
         n_threads=4,
         n_batch=64,
-        n_threads_batch=4,
+        n_threads_batch=32,
         mlock=True,
         repeat_penalty=1.1,
         temperature=0.7,
