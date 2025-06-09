@@ -169,6 +169,16 @@
           opacity: 1;
         }
       }
+
+      .empty-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        text-align: center;
+        font-size: 1.25rem;
+        color: #888;
+      }
     </style>
   </head>
   <body x-data="chatApp()">
@@ -198,7 +208,9 @@
           </template>
         </div>
       </template>
-
+      <div x-show="messages.length === 0 && !isGenerating" class="empty-state">
+        <p>How can I assist you today?</p>
+      </div>
       <div x-ref="bottomAnchor"></div>
     </main>
 
