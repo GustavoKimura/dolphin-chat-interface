@@ -9,7 +9,7 @@ from jinja2 import Template
 
 # Constants
 MAX_TOKENS = 256
-CONTEXT_SIZE = 32768
+CONTEXT_SIZE = 131072
 THREADS_TO_USE = os.cpu_count() or 4
 BATCH_SIZE = 312
 REPEAT_PENALTY = 1.2
