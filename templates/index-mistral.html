@@ -41,7 +41,7 @@
 
       header h1 {
         margin: 0;
-        color: #f08700;
+        color: #ff7dcc;
         font-weight: bold;
       }
 
@@ -58,12 +58,15 @@
       }
 
       .chat {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
         margin-bottom: 1.5rem;
       }
 
       .user {
         font-weight: bold;
-        color: #42caff;
+        color: #ff7dcc;
       }
 
       .bubble {
@@ -74,6 +77,9 @@
         margin-top: 0.5rem;
         margin-bottom: 1rem;
         width: 100%;
+        align-self: stretch;
+        display: block;
+        box-sizing: border-box;
         word-wrap: break-word;
         text-align: start;
         font-size: 1rem;
@@ -110,12 +116,12 @@
       }
 
       input[type="text"]:focus {
-        border-color: #f08700;
-        box-shadow: 0 0 5px #f0870070;
+        border-color: #ff7dcc;
+        box-shadow: 0 0 5px #ff7dcc70;
       }
 
       button {
-        background-color: #f08700;
+        background-color: #ff7dcc;
         color: #fff;
         padding: 0.75rem 1rem;
         border: none;
@@ -128,7 +134,7 @@
       }
 
       button:hover {
-        background-color: #d57500;
+        background-color: #c44dcc;
       }
 
       .typing {
@@ -144,7 +150,7 @@
         animation: blink 1.5s infinite;
         width: 0.5rem;
         height: 0.5rem;
-        background: #f08700;
+        background: #ff7dcc;
         border-radius: 50%;
         display: inline-block;
       }
