@@ -8,7 +8,7 @@ from llama_cpp import Llama
 from jinja2 import Template
 
 # Constants
-MAX_TOKENS = 256
+MAX_TOKENS = 4096
 CONTEXT_SIZE = 131072
 THREADS_TO_USE = os.cpu_count() or 4
 BATCH_SIZE = 512
@@ -19,10 +19,10 @@ CREATIVE = "creative"
 
 GENERATION_PROFILES = {
     BALANCED: {
-        "temperature": 0.5,
+        "temperature": 0.7,
         "top_k": 50,
         "top_p": 0.9,
-        "repeat_penalty": 1.15,
+        "repeat_penalty": 1.05,
     },
     RATIONAL: {
         "temperature": 0.3,
@@ -74,6 +74,7 @@ try:
         top_k=profile["top_k"],
         top_p=profile["top_p"],
         chat_format="chatml",
+        stop=[],
         verbose=False,
     )
     logger.info("Successfully initialized LLM model")
