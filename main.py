@@ -10,7 +10,7 @@ with open("models/templates/custom.jinja", "r", encoding="utf-8") as f:
     jinja_template = Template(f.read())
 
 llm = Llama(
-    model_path="models/dolphin/dolphin.gguf",
+    model_path="models/mistral/mistral.gguf",
     n_ctx=4096,
     n_threads=os.cpu_count(),
     n_threads_batch=os.cpu_count(),
@@ -21,15 +21,32 @@ llm = Llama(
     temperature=0.5,
     top_k=50,
     top_p=0.85,
-    chat_format="chatml",
+    chat_format="mistral",
     stop=[],
     verbose=False,
 )
 
+# llm = Llama(
+#     model_path="models/dolphin/dolphin.gguf",
+#     n_ctx=4096,
+#     n_threads=os.cpu_count(),
+#     n_threads_batch=os.cpu_count(),
+#     n_batch=512,
+#     n_ubatch=128,
+#     mlock=True,
+#     repeat_penalty=1.15,
+#     temperature=0.5,
+#     top_k=50,
+#     top_p=0.85,
+#     chat_format="chatml",
+#     stop=[],
+#     verbose=False,
+# )
+
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index-mistral.html")
 
 
 @app.route("/chat", methods=["POST"])

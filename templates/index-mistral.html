@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>🧠 Mistral 7B</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: #0f0f0f;
+        color: #f0f0f0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        background: #0f0f0f;
+        padding: 1rem 2rem;
+        text-align: center;
+        z-index: 10;
+        border-bottom: 1px solid #2a2a2a;
+      }
+
+      header h1 {
+        margin: 0;
+        color: #f08700;
+        font-weight: bold;
+      }
+
+      main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 2rem;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      main::-webkit-scrollbar {
+        display: none;
+      }
+
+      .chat {
+        margin-bottom: 1.5rem;
+      }
+
+      .user {
+        font-weight: bold;
+        color: #42caff;
+      }
+
+      .bubble {
+        background: #1b1b1b;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+        width: 100%;
+        word-wrap: break-word;
+        text-align: start;
+        font-size: 1rem;
+      }
+
+      footer {
+        position: sticky;
+        bottom: 0;
+        background: #0f0f0f;
+        padding: 1rem 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      form {
+        display: flex;
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 700px;
+        padding: 0 1rem;
+      }
+
+      input[type="text"] {
+        flex: 1;
+        background-color: #1f1f1f;
+        color: #fff;
+        padding: 0.75rem 1rem;
+        border: 1px solid #444;
+        border-radius: 8px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input[type="text"]:focus {
+        border-color: #f08700;
+        box-shadow: 0 0 5px #f0870070;
+      }
+
+      button {
+        background-color: #f08700;
+        color: #fff;
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        white-space: nowrap;
+      }
+
+      button:hover {
+        background-color: #d57500;
+      }
+
+      .typing {
+        display: flex;
+        gap: 0.3rem;
+        align-items: center;
+        justify-content: flex-start;
+        font-size: 1.5rem;
+        color: #aaa;
+      }
+
+      .dot {
+        animation: blink 1.5s infinite;
+        width: 0.5rem;
+        height: 0.5rem;
+        background: #f08700;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes blink {
+        0%,
+        80%,
+        100% {
+          opacity: 0.2;
+        }
+        40% {
+          opacity: 1;
+        }
+      }
+
+      .empty-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        text-align: center;
+        font-size: 1.25rem;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body x-data="chatApp()">
+    <header>
+      <h1>🧠 Mistral 7B</h1>
+    </header>
+
+    <main>
+      <template x-for="msg in messages" :key="msg.id">
+        <div class="chat">
+          <div class="user">You:</div>
+          <div class="bubble" x-text="msg.prompt"></div>
+          <template x-if="msg.response">
+            <div>
+              <div class="user">Mistral:</div>
+              <div class="bubble" x-text="msg.response"></div>
+            </div>
+          </template>
+          <template
+            x-if="isGenerating && msg === messages[messages.length - 1]"
+          >
+            <div class="bubble bot typing">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+          </template>
+        </div>
+      </template>
+      <div x-show="messages.length === 0 && !isGenerating" class="empty-state">
+        <p>How can I assist you today?</p>
+      </div>
+      <div x-ref="bottomAnchor"></div>
+    </main>
+
+    <footer>
+      <form @submit.prevent="sendMessage">
+        <input type="text" x-model="prompt" placeholder="Ask me anything 🧠" />
+        <button type="submit" :disabled="isGenerating">Ask 💬</button>
+      </form>
+    </footer>
+
+    <script>
+      function chatApp() {
+        return {
+          prompt: "",
+          messages: [],
+          isGenerating: false,
+          sendMessage() {
+            const text = this.prompt.trim();
+            if (!text || this.isGenerating) return;
+
+            const id = Date.now();
+            const newMessage = { id, prompt: text, response: "" };
+            this.messages.push(newMessage);
+            this.prompt = "";
+            this.isGenerating = true;
+            this.scrollToBottom();
+
+            fetch("/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt: text }),
+            }).then((res) => {
+              const reader = res.body.getReader();
+              const decoder = new TextDecoder();
+
+              const read = () => {
+                reader.read().then(({ done, value }) => {
+                  if (done) {
+                    this.isGenerating = false;
+                    this.scrollToBottom();
+                    return;
+                  }
+
+                  const chunk = decoder.decode(value, { stream: true });
+                  const lines = chunk.split("\n");
+
+                  for (const line of lines) {
+                    if (line.startsWith("data: ")) {
+                      this.scrollToBottom();
+
+                      const payload = line.replace("data: ", "");
+                      if (payload === "[DONE]") {
+                        this.isGenerating = false;
+                        return;
+                      }
+
+                      try {
+                        const data = JSON.parse(payload);
+                        const msg = this.messages.find((m) => m.id === id);
+                        if (msg) {
+                          msg.response += data.token;
+                        }
+                      } catch (err) {
+                        console.error("Erro ao decodificar JSON:", err);
+                      }
+                    }
+                  }
+
+                  read();
+                });
+              };
+
+              read();
+            });
+          },
+          scrollToBottom() {
+            this.$nextTick(() => {
+              this.$refs.bottomAnchor?.scrollIntoView({ behavior: "smooth" });
+            });
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
