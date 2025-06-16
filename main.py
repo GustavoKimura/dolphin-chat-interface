@@ -29,7 +29,7 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 
 # Load template
 try:
-    with open("models/mistral/custom.jinja", "r", encoding="utf-8") as f:
+    with open("models/dolphin/custom.jinja", "r", encoding="utf-8") as f:
         jinja_template = Template(f.read())
     logger.info("Successfully loaded Jinja template")
 except Exception as e:
@@ -39,7 +39,7 @@ except Exception as e:
 # Initialize LLM
 try:
     llm = Llama(
-        model_path="models/mistral/mistral.gguf",
+        model_path="models/dolphin/dolphin.gguf",
         n_ctx=CONTEXT_SIZE,
         n_threads=THREADS_TO_USE,
         n_threads_batch=THREADS_TO_USE,
