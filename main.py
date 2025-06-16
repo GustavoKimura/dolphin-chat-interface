@@ -11,20 +11,21 @@ with open("models/mistral/custom.jinja", "r", encoding="utf-8") as f:
 
 llm = Llama(
     model_path="models/mistral/mistral.gguf",
-    n_ctx=4096,
+    n_ctx=8192,
     n_threads=os.cpu_count(),
     n_threads_batch=os.cpu_count(),
-    n_batch=512,
-    n_ubatch=128,
+    n_batch=256,
+    n_ubatch=64,
     mlock=True,
     repeat_penalty=1.15,
     temperature=0.5,
     top_k=50,
-    top_p=0.85,
-    chat_format="mistral",
+    top_p=0.9,
+    chat_format=None,
     stop=[],
     verbose=False,
 )
+
 
 # llm = Llama(
 #     model_path="models/dolphin/dolphin.gguf",
@@ -38,7 +39,7 @@ llm = Llama(
 #     temperature=0.5,
 #     top_k=50,
 #     top_p=0.85,
-#     chat_format="chatml",
+#     chat_format=None,
 #     stop=[],
 #     verbose=False,
 # )
@@ -52,8 +53,7 @@ def index():
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
-    user_input = data.get("prompt", "")
-    messages = [{"role": "user", "content": user_input}]
+    messages = data.get("messages", [])
     formatted_prompt = jinja_template.render(messages=messages).strip()
 
     def generate():

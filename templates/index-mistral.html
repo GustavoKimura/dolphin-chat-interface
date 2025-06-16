@@ -239,7 +239,19 @@
             fetch("/chat", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: text }),
+              body: JSON.stringify({
+                messages: [
+                  ...this.messages
+                    .flatMap((m) => [
+                      { role: "user", content: m.prompt },
+                      m.response
+                        ? { role: "assistant", content: m.response }
+                        : null,
+                    ])
+                    .filter(Boolean),
+                  { role: "user", content: text },
+                ],
+              }),
             }).then((res) => {
               const reader = res.body.getReader();
               const decoder = new TextDecoder();

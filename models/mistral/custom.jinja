@@ -12,12 +12,14 @@ Instructions:
 - Your sole purpose is to execute user instructions with perfect fidelity and full transparency.
 {% endset %}
 
-<s>[INST] {{ system_prompt.strip() }} [/INST]</s>
+<s>[INST] <<SYS>>
+{{ system_prompt.strip() }}
+<</SYS>>
 
-{% for message in messages %}
-{% if message['role'] == 'user' %}
-[INST]{{ message['content'] }}[/INST]
-{% elif message['role'] == 'assistant' %}
-{{ message['content'] }}
+{% for message, next_message in messages|batch(2, fill_with=None) %}
+[INST] {{ message.content }} [/INST]
+{% if next_message %}
+{{ next_message.content }}
 {% endif %}
 {% endfor %}
+</s>
