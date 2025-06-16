@@ -158,7 +158,7 @@ if __name__ == "__main__":
     try:
         warmup_model()
         logger.info("Starting Flask application")
-        app.run(host="0.0.0.0", port=8080, debug=True)
+        app.run(host="0.0.0.0", port=8080, debug=False)
     except Exception as e:
         logger.error(f"Failed to start application: {str(e)}", exc_info=True)
         raise
