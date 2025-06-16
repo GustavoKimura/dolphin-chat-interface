@@ -197,18 +197,15 @@
     </header>
 
     <main>
-      <template x-for="msg in messages" :key="msg.id">
+      <template x-for="(msg, index) in messages" :key="index">
         <div class="chat">
-          <div class="user">You:</div>
-          <div class="bubble" x-text="msg.prompt"></div>
-          <template x-if="msg.response">
-            <div>
-              <div class="user">Dolphin:</div>
-              <div class="bubble" x-text="msg.response"></div>
-            </div>
-          </template>
+          <div
+            class="user"
+            x-text="msg.role === 'user' ? 'You:' : 'Dolphin:'"
+          ></div>
+          <div class="bubble" x-text="msg.content"></div>
           <template
-            x-if="isGenerating && msg === messages[messages.length - 1]"
+            x-if="isGenerating && index === messages.length - 1 && msg.role === 'assistant'"
           >
             <div class="bubble bot typing">
               <span class="dot"></span>
@@ -218,9 +215,11 @@
           </template>
         </div>
       </template>
+
       <div x-show="messages.length === 0 && !isGenerating" class="empty-state">
         <p>How can I assist you today?</p>
       </div>
+
       <div x-ref="bottomAnchor"></div>
     </main>
 
@@ -237,65 +236,65 @@
           prompt: "",
           messages: [],
           isGenerating: false,
-          sendMessage() {
+
+          async sendMessage() {
             const text = this.prompt.trim();
             if (!text || this.isGenerating) return;
 
-            const id = Date.now();
-            const newMessage = { id, prompt: text, response: "" };
-            this.messages.push(newMessage);
+            this.messages.push({ role: "user", content: text });
+            this.messages.push({ role: "assistant", content: "" });
+
+            const assistantIndex = this.messages.length - 1;
+
             this.prompt = "";
             this.isGenerating = true;
             this.scrollToBottom();
 
-            fetch("/chat", {
+            const res = await fetch("/chat", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: text }),
-            }).then((res) => {
-              const reader = res.body.getReader();
-              const decoder = new TextDecoder();
+              body: JSON.stringify({ messages: this.messages }),
+            });
 
-              const read = () => {
-                reader.read().then(({ done, value }) => {
-                  if (done) {
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+
+            const read = async () => {
+              const { done, value } = await reader.read();
+              if (done) {
+                this.isGenerating = false;
+                this.scrollToBottom();
+                return;
+              }
+
+              const chunk = decoder.decode(value, { stream: true });
+              const lines = chunk.split("\n");
+
+              for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                  const payload = line.replace("data: ", "");
+                  if (payload === "[DONE]") {
                     this.isGenerating = false;
                     this.scrollToBottom();
                     return;
                   }
 
-                  const chunk = decoder.decode(value, { stream: true });
-                  const lines = chunk.split("\n");
-
-                  for (const line of lines) {
-                    if (line.startsWith("data: ")) {
-                      this.scrollToBottom();
-
-                      const payload = line.replace("data: ", "");
-                      if (payload === "[DONE]") {
-                        this.isGenerating = false;
-                        return;
-                      }
-
-                      try {
-                        const data = JSON.parse(payload);
-                        const msg = this.messages.find((m) => m.id === id);
-                        if (msg) {
-                          msg.response += data.token;
-                        }
-                      } catch (err) {
-                        console.error("Erro ao decodificar JSON:", err);
-                      }
-                    }
+                  try {
+                    const data = JSON.parse(payload);
+                    this.messages[assistantIndex].content += data.token;
+                    this.scrollToBottom();
+                  } catch (err) {
+                    console.error("Erro ao decodificar JSON:", err);
                   }
-
-                  read();
-                });
-              };
+                }
+              }
 
               read();
-            });
+            };
+
+            read();
           },
+
           scrollToBottom() {
             this.$nextTick(() => {
               this.$refs.bottomAnchor?.scrollIntoView({ behavior: "smooth" });
