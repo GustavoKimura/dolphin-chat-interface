@@ -55,6 +55,7 @@ def chat():
     data = request.get_json()
     messages = data.get("messages", [])
     formatted_prompt = jinja_template.render(messages=messages).strip()
+    print(f"[DEBUG] Formatted prompt:\n{formatted_prompt}")
 
     def generate():
         start_time = time.time()
@@ -86,6 +87,7 @@ if __name__ == "__main__":
         try:
             messages = [{"role": "user", "content": "Doing warmup..."}]
             formatted_prompt = jinja_template.render(messages=messages)
+            print(f"[DEBUG] Warmup prompt:\n{formatted_prompt}")
 
             token_count = 0
             for chunk in llm(
@@ -103,6 +105,6 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"[LOG] Warmup error: {e}")
 
-    warmup_model()
+    # warmup_model()
 
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=8080, debug=True)
