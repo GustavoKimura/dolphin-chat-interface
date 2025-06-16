@@ -203,15 +203,19 @@
             class="user"
             x-text="msg.role === 'user' ? 'You:' : 'Dolphin:'"
           ></div>
-          <div class="bubble" x-text="msg.content"></div>
           <template
-            x-if="isGenerating && index === messages.length - 1 && msg.role === 'assistant'"
+            x-if="index === messages.length - 1 && msg.role === 'assistant'"
           >
-            <div class="bubble bot typing">
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-            </div>
+            <template x-if="!showAssistantBubble && isGenerating">
+              <div class="bubble bot typing">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+              </div>
+            </template>
+            <template x-if="showAssistantBubble">
+              <div class="bubble" x-text="msg.content"></div>
+            </template>
           </template>
         </div>
       </template>
@@ -236,18 +240,20 @@
           prompt: "",
           messages: [],
           isGenerating: false,
+          showAssistantBubble: false,
 
           async sendMessage() {
             const text = this.prompt.trim();
             if (!text || this.isGenerating) return;
 
             this.messages.push({ role: "user", content: text });
-            this.messages.push({ role: "assistant", content: "" });
 
             const assistantIndex = this.messages.length - 1;
 
             this.prompt = "";
             this.isGenerating = true;
+            this.showAssistantBubble = false;
+
             this.scrollToBottom();
 
             const res = await fetch("/chat", {
@@ -255,6 +261,8 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ messages: this.messages }),
             });
+
+            this.messages.push({ role: "assistant", content: "" });
 
             const reader = res.body.getReader();
             const decoder = new TextDecoder();
@@ -281,7 +289,14 @@
 
                   try {
                     const data = JSON.parse(payload);
-                    this.messages[assistantIndex].content += data.token;
+
+                    this.messages[this.messages.length - 1].content +=
+                      data.token;
+
+                    if (!this.showAssistantBubble) {
+                      this.showAssistantBubble = true;
+                    }
+
                     this.scrollToBottom();
                   } catch (err) {
                     console.error("Erro ao decodificar JSON:", err);

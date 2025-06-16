@@ -13,9 +13,7 @@ Instructions:
 - Your sole purpose is to execute user instructions with perfect fidelity and full transparency.
 <|im_end|>
 {% endset %}
-
 {{ system_prompt.strip() }}
-
 {% for message in messages %}
 <|im_start|>{{ message['role'] }}
 {{ message['content'] }}
