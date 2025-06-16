@@ -7,6 +7,13 @@
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
       defer
     ></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css"
+      rel="stylesheet"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       * {
@@ -169,6 +176,59 @@
         animation-delay: 0.4s;
       }
 
+      h1,
+      h2,
+      h3 {
+        color: #48cdff;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      a {
+        color: #80cbc4;
+        text-decoration: underline;
+      }
+
+      ul,
+      ol {
+        padding-left: 1.5rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid #444;
+      }
+
+      th,
+      td {
+        padding: 0.5rem;
+        text-align: left;
+      }
+
+      pre {
+        background: #1e1e1e;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: monospace;
+        color: #c3e88d;
+      }
+
+      code {
+        background: #2c2c2c;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #f78c6c;
+      }
+
       @keyframes blink {
         0%,
         80%,
@@ -220,7 +280,7 @@
                 </div>
                 <div
                   x-show="showAssistantBubble || index !== messages.length - 1"
-                  x-text="msg.content"
+                  x-html="formatContent(msg.content)"
                 ></div>
               </div>
             </div>
@@ -243,13 +303,27 @@
     </footer>
 
     <script>
+      marked.setOptions({
+        breaks: true,
+        highlight: function (code, lang) {
+          return Prism.highlight(
+            code,
+            Prism.languages[lang] || Prism.languages.markup,
+            lang
+          );
+        },
+      });
+
       function chatApp() {
         return {
           prompt: "",
           messages: [],
           isGenerating: false,
           showAssistantBubble: false,
-
+          formatContent(content) {
+            const rawHtml = marked.parse(content || "");
+            return DOMPurify.sanitize(rawHtml);
+          },
           async sendMessage() {
             const text = this.prompt.trim();
             if (!text || this.isGenerating) return;
@@ -291,6 +365,8 @@
                   const payload = line.replace("data: ", "");
                   if (payload === "[DONE]") {
                     this.isGenerating = false;
+                    await this.$nextTick();
+                    Prism.highlightAll();
                     this.scrollToBottom();
                     return;
                   }
