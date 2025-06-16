@@ -11,7 +11,7 @@ with open("models/mistral/custom.jinja", "r", encoding="utf-8") as f:
 
 llm = Llama(
     model_path="models/mistral/mistral.gguf",
-    n_ctx=8192,
+    n_ctx=32768,
     n_threads=os.cpu_count(),
     n_threads_batch=os.cpu_count(),
     n_batch=256,
@@ -22,7 +22,7 @@ llm = Llama(
     top_k=50,
     top_p=0.9,
     chat_format=None,
-    stop=[],
+    stop=["</s>"],
     verbose=False,
 )
 
@@ -40,7 +40,7 @@ llm = Llama(
 #     top_k=50,
 #     top_p=0.85,
 #     chat_format=None,
-#     stop=[],
+#     stop=["</s>"],
 #     verbose=False,
 # )
 

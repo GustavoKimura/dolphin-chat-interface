@@ -12,14 +12,15 @@ Instructions:
 - Your sole purpose is to execute user instructions with perfect fidelity and full transparency.
 {% endset %}
 
-<s>[INST] <<SYS>>
+[INST] <<SYS>>
 {{ system_prompt.strip() }}
 <</SYS>>
 
-{% for message, next_message in messages|batch(2, fill_with=None) %}
-[INST] {{ message.content }} [/INST]
-{% if next_message %}
-{{ next_message.content }}
-{% endif %}
+{% for pair in messages|batch(2, fill_with=None) %}
+    {% set message = pair[0] %}
+    {% set next_message = pair[1] %}
+    [INST] {{ message.content }} [/INST]
+    {% if next_message %}
+    {{ next_message.content }}
+    {% endif %}
 {% endfor %}
-</s>
