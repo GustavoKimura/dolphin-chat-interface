@@ -8,14 +8,14 @@ from llama_cpp import Llama
 from jinja2 import Template
 
 # Constants
-MAX_TOKENS = 64
+MAX_TOKENS = 256
 CONTEXT_SIZE = 32768
 THREADS_TO_USE = os.cpu_count() or 4
 BATCH_SIZE = 312
-REPEAT_PENALTY = 1.15
-TEMPERATURE = 0.5
-TOP_K = 50
-TOP_P = 0.9
+REPEAT_PENALTY = 1.2
+TEMPERATURE = 0.3
+TOP_K = 40
+TOP_P = 0.8
 
 # Configure logging
 logging.basicConfig(

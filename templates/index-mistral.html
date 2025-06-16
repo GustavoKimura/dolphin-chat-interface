@@ -252,20 +252,14 @@
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                messages:
-                  this.messages.length > 0
-                    ? [
-                        ...this.messages
-                          .flatMap((m) => [
-                            { role: "user", content: m.prompt },
-                            m.response
-                              ? { role: "assistant", content: m.response }
-                              : null,
-                          ])
-                          .filter(Boolean),
-                        { role: "user", content: text },
-                      ]
-                    : [{ role: "user", content: text }],
+                messages: this.messages
+                  .flatMap((m) => [
+                    { role: "user", content: m.prompt },
+                    m.response
+                      ? { role: "assistant", content: m.response }
+                      : null,
+                  ])
+                  .filter(Boolean),
               }),
             }).then((res) => {
               const reader = res.body.getReader();
