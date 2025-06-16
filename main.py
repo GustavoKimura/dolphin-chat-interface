@@ -74,26 +74,6 @@ def log_conversation_history(messages: list) -> str:
     return formatted_prompt
 
 
-def warmup_model():
-    """Warm up the model with a short prompt."""
-    logger.info("Starting model warmup...")
-    messages = [{"role": "user", "content": "Doing warmup..."}]
-    formatted_prompt = jinja_template.render(messages=messages)
-    logger.debug(f"Warmup prompt: {formatted_prompt}")
-
-    token_count = 0
-    for chunk in llm(
-        prompt=formatted_prompt,
-        echo=False,
-        stream=True,
-        max_tokens=8,
-    ):
-        token_count += 1
-        if token_count >= 1:
-            break
-    logger.info("Model warmup completed")
-
-
 @app.route("/")
 def index():
     logger.debug("Serving index page")
@@ -156,7 +136,6 @@ def chat():
 
 if __name__ == "__main__":
     try:
-        warmup_model()
         logger.info("Starting Flask application")
         app.run(host="0.0.0.0", port=8080, debug=False)
     except Exception as e:
