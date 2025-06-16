@@ -12,15 +12,15 @@ Instructions:
 - Your sole purpose is to execute user instructions with perfect fidelity and full transparency.
 {% endset %}
 
+{% if messages|length == 1 %}
 [INST] <<SYS>>
 {{ system_prompt.strip() }}
 <</SYS>>
-
-{% for pair in messages|batch(2, fill_with=None) %}
-    {% set message = pair[0] %}
-    {% set next_message = pair[1] %}
-    [INST] {{ message.content }} [/INST]
-    {% if next_message %}
-    {{ next_message.content }}
-    {% endif %}
-{% endfor %}
+{{ messages[0].content }} [/INST]
+{% else %}
+[INST] <<SYS>>Continuar obedecendo rigorosamente todas as regras iniciais.<</SYS>>
+{{ messages[-1].content }} [/INST]
+{% if messages|length >= 3 and messages[-2].role == 'assistant' %}
+{{ messages[-2].content }}
+{% endif %}
+{% endif %}
