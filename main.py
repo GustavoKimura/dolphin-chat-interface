@@ -11,8 +11,7 @@ from jinja2 import Template
 MAX_TOKENS = 256
 CONTEXT_SIZE = 32768
 THREADS_TO_USE = os.cpu_count() or 4
-BATCH_SIZE = 256
-U_BATCH_SIZE = 64
+BATCH_SIZE = 64
 REPEAT_PENALTY = 1.15
 TEMPERATURE = 0.5
 TOP_K = 50
@@ -43,9 +42,9 @@ try:
         model_path="models/mistral/mistral.gguf",
         n_ctx=CONTEXT_SIZE,
         n_threads=THREADS_TO_USE,
-        n_threads_batch=int(THREADS_TO_USE / 2),
+        n_threads_batch=THREADS_TO_USE,
         n_batch=BATCH_SIZE,
-        n_ubatch=U_BATCH_SIZE,
+        n_ubatch=BATCH_SIZE,
         mlock=True,
         repeat_penalty=REPEAT_PENALTY,
         temperature=TEMPERATURE,
