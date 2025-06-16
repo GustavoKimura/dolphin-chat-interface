@@ -35,7 +35,7 @@ for batch in [
     print(f"\n🔍 Testing batch size: {batch}")
 
     llm = Llama(
-        model_path="models/mistral/mistral.gguf",
+        model_path="models/dolphin/dolphin.gguf",
         n_ctx=CONTEXT_SIZE,
         n_threads=THREADS_TO_USE,
         n_threads_batch=THREADS_TO_USE,

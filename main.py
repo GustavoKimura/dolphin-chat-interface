@@ -36,7 +36,7 @@ except Exception as e:
     logger.error(f"Failed to load Jinja template: {str(e)}")
     raise
 
-# Initialize LLM
+# Initialize Dolphin LLM
 try:
     llm = Llama(
         model_path="models/dolphin/dolphin.gguf",
@@ -50,8 +50,7 @@ try:
         temperature=TEMPERATURE,
         top_k=TOP_K,
         top_p=TOP_P,
-        chat_format=None,
-        stop=["</s>"],
+        chat_format="chatml",
         verbose=False,
     )
     logger.info("Successfully initialized LLM model")
@@ -76,7 +75,7 @@ def log_conversation_history(messages: list) -> str:
 @app.route("/")
 def index():
     logger.debug("Serving index page")
-    return render_template("index-mistral.html")
+    return render_template("index.html")
 
 
 @app.route("/chat", methods=["POST"])
