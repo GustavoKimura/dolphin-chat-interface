@@ -11,11 +11,34 @@ from jinja2 import Template
 MAX_TOKENS = 256
 CONTEXT_SIZE = 131072
 THREADS_TO_USE = os.cpu_count() or 4
-BATCH_SIZE = 312
-REPEAT_PENALTY = 1.2
-TEMPERATURE = 0.3
-TOP_K = 40
-TOP_P = 0.8
+BATCH_SIZE = 512
+
+BALANCED = "balanced"
+RATIONAL = "rational"
+CREATIVE = "creative"
+
+GENERATION_PROFILES = {
+    BALANCED: {
+        "temperature": 0.5,
+        "top_k": 50,
+        "top_p": 0.9,
+        "repeat_penalty": 1.15,
+    },
+    RATIONAL: {
+        "temperature": 0.3,
+        "top_k": 40,
+        "top_p": 0.85,
+        "repeat_penalty": 1.15,
+    },
+    CREATIVE: {
+        "temperature": 0.7,
+        "top_k": 60,
+        "top_p": 0.9,
+        "repeat_penalty": 1.1,
+    },
+}
+
+profile = GENERATION_PROFILES[BALANCED]
 
 # Configure logging
 logging.basicConfig(
@@ -46,10 +69,10 @@ try:
         n_batch=BATCH_SIZE,
         n_ubatch=BATCH_SIZE,
         mlock=True,
-        repeat_penalty=REPEAT_PENALTY,
-        temperature=TEMPERATURE,
-        top_k=TOP_K,
-        top_p=TOP_P,
+        repeat_penalty=profile["repeat_penalty"],
+        temperature=profile["temperature"],
+        top_k=profile["top_k"],
+        top_p=profile["top_p"],
         chat_format="chatml",
         verbose=False,
     )
@@ -85,6 +108,12 @@ def chat():
         messages = data.get("messages", [])
         logger.info(f"Received chat request with {len(messages)} messages")
 
+        profile_name = data.get("profile", BALANCED)
+        selected_profile = GENERATION_PROFILES.get(
+            profile_name, GENERATION_PROFILES[BALANCED]
+        )
+        logger.info(f"Using generation profile: {profile_name}")
+
         formatted_prompt = log_conversation_history(messages)
 
         def generate():
@@ -98,6 +127,10 @@ def chat():
                 echo=False,
                 stream=True,
                 max_tokens=MAX_TOKENS,
+                temperature=selected_profile["temperature"],
+                top_k=selected_profile["top_k"],
+                top_p=selected_profile["top_p"],
+                repeat_penalty=selected_profile["repeat_penalty"],
             ):
                 chunk_dict = cast(Dict[str, Any], chunk)
                 token = chunk_dict["choices"][0]["text"]
