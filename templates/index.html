@@ -199,23 +199,25 @@
     <main>
       <template x-for="(msg, index) in messages" :key="index">
         <div class="chat">
-          <div
-            class="user"
-            x-text="msg.role === 'user' ? 'You:' : 'Dolphin:'"
-          ></div>
-          <template
-            x-if="index === messages.length - 1 && msg.role === 'assistant'"
-          >
-            <template x-if="!showAssistantBubble && isGenerating">
+          <template x-if="msg.role === 'assistant'">
+            <template
+              x-if="index === messages.length - 1 && !showAssistantBubble && isGenerating"
+            >
               <div class="bubble bot typing">
                 <span class="dot"></span>
                 <span class="dot"></span>
                 <span class="dot"></span>
               </div>
             </template>
-            <template x-if="showAssistantBubble">
+            <template
+              x-if="index !== messages.length - 1 || showAssistantBubble"
+            >
               <div class="bubble" x-text="msg.content"></div>
             </template>
+          </template>
+
+          <template x-if="msg.role === 'user'">
+            <div class="bubble" x-text="msg.content"></div>
           </template>
         </div>
       </template>
@@ -299,7 +301,7 @@
 
                     this.scrollToBottom();
                   } catch (err) {
-                    console.error("Erro ao decodificar JSON:", err);
+                    console.error("JSON parsing error:", err);
                   }
                 }
               }
