@@ -16,7 +16,6 @@ Instructions:
 {{ system_prompt.strip() }}
 {% for message in messages %}
 <|im_start|>{{ message['role'] }}
-{{ message['content'] }}
-<|im_end|>
+{{ message['content'].strip() }}<|im_end|>
 {% endfor %}
 <|im_start|>assistant
