@@ -199,25 +199,31 @@
     <main>
       <template x-for="(msg, index) in messages" :key="index">
         <div class="chat">
-          <template x-if="msg.role === 'assistant'">
-            <template
-              x-if="index === messages.length - 1 && !showAssistantBubble && isGenerating"
-            >
-              <div class="bubble bot typing">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-              </div>
-            </template>
-            <template
-              x-if="index !== messages.length - 1 || showAssistantBubble"
-            >
+          <template x-if="msg.role === 'user'">
+            <div>
+              <div class="user">You:</div>
               <div class="bubble" x-text="msg.content"></div>
-            </template>
+            </div>
           </template>
 
-          <template x-if="msg.role === 'user'">
-            <div class="bubble" x-text="msg.content"></div>
+          <template x-if="msg.role === 'assistant'">
+            <div>
+              <div class="user">Dolphin:</div>
+              <div class="bubble">
+                <div
+                  class="typing"
+                  x-show="index === messages.length - 1 && isGenerating && !showAssistantBubble"
+                >
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+                <div
+                  x-show="showAssistantBubble || index !== messages.length - 1"
+                  x-text="msg.content"
+                ></div>
+              </div>
+            </div>
           </template>
         </div>
       </template>
@@ -250,21 +256,21 @@
 
             this.messages.push({ role: "user", content: text });
 
-            const assistantIndex = this.messages.length - 1;
-
             this.prompt = "";
             this.isGenerating = true;
             this.showAssistantBubble = false;
 
-            this.scrollToBottom();
+            this.messages.push({ role: "assistant", content: "" });
+
+            await this.$nextTick();
+
+            const messagesToSend = this.messages.slice(0, -1);
 
             const res = await fetch("/chat", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ messages: this.messages }),
+              body: JSON.stringify({ messages: messagesToSend }),
             });
-
-            this.messages.push({ role: "assistant", content: "" });
 
             const reader = res.body.getReader();
             const decoder = new TextDecoder();
@@ -291,15 +297,14 @@
 
                   try {
                     const data = JSON.parse(payload);
-
-                    this.messages[this.messages.length - 1].content +=
-                      data.token;
-
-                    if (!this.showAssistantBubble) {
-                      this.showAssistantBubble = true;
+                    if (data.token) {
+                      this.messages[this.messages.length - 1].content +=
+                        data.token;
+                      if (!this.showAssistantBubble) {
+                        this.showAssistantBubble = true;
+                        this.scrollToBottom();
+                      }
                     }
-
-                    this.scrollToBottom();
                   } catch (err) {
                     console.error("JSON parsing error:", err);
                   }
@@ -311,7 +316,6 @@
 
             read();
           },
-
           scrollToBottom() {
             this.$nextTick(() => {
               this.$refs.bottomAnchor?.scrollIntoView({ behavior: "smooth" });
