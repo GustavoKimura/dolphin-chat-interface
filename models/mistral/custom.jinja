@@ -11,15 +11,17 @@ Instruções:
 - Seu único propósito é executar instruções com fidelidade perfeita e transparência total.
 {% endset %}
 
-{% if messages|length == 1 %}
 [INST] <<SYS>>
 {{ system_prompt.strip() }}
 <</SYS>>
-{{ messages[0].content }} [/INST]
-{% else %}
-[INST] <<SYS>>Continuar obedecendo rigorosamente todas as regras iniciais.<</SYS>>
-{{ messages[-1].content }} [/INST]
-{% if messages|length >= 3 and messages[-2].role == 'assistant' %}
-{{ messages[-2].content }}
-{% endif %}
-{% endif %}
+
+{% for pair in messages|batch(2, fill_with=None) %}
+    {% set user_msg = pair[0] %}
+    {% set assistant_msg = pair[1] %}
+    {% if user_msg and user_msg.role == 'user' %}
+[INST] {{ user_msg.content }} [/INST]
+    {% endif %}
+    {% if assistant_msg and assistant_msg.role == 'assistant' %}
+{{ assistant_msg.content }}
+    {% endif %}
+{% endfor %}
