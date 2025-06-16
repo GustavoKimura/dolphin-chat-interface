@@ -6,7 +6,7 @@ from jinja2 import Template
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
-with open("models/templates/custom.jinja", "r", encoding="utf-8") as f:
+with open("models/mistral/custom.jinja", "r", encoding="utf-8") as f:
     jinja_template = Template(f.read())
 
 llm = Llama(
