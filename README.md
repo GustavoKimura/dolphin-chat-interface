@@ -1,27 +1,27 @@
 # **🐬 Dolphin (3.0) - Chat Interface**
 
-### Este projeto em Python integra o Dolphin 3.0 em uma interface gráfica de chat, permitindo interação conversacional com o modelo de IA.
+### This Python project integrates **Dolphin 3.0** into a graphical chat interface, enabling conversational interaction with the AI model.
 
 ---
 
-### **🛠️ Pré-Requisitos 🛠️**
-- Python 3.x instalado.
-- Modelo dolphin.gguf instalado e na pasta correta (ler `/models/dolphin/README.md`).
+### **🛠️ Prerequisites 🛠️**
+- Python 3.x installed.
+- **dolphin.gguf** model installed and in the correct folder (read `/models/dolphin/README.md`).
 
 ---
 
-### **⚠️ Isenção de Responsabilidade ⚠️**
+### **⚠️ Disclaimer ⚠️**
 
-Este projeto é fornecido "**como está**" e tem como objetivo apenas **estudos e aprendizado**. O autor **não se responsabiliza** por quaisquer danos, perdas ou consequências negativas decorrentes do uso deste código, incluindo mas não se limitando a:
+This project is provided "**as is**" and is intended solely for **study and learning purposes**. The author **is not responsible** for any damages, losses, or negative consequences arising from the use of this code, including but not limited to:
 
-1. Uso indevido ou impróprio do assistente de IA.
-2. Decisões tomadas com base nas respostas do Dolphin 3.0.
-3. Consequências de seguir as instruções ou interações realizadas com o Dolphin 3.0.
+1. Misuse or improper use of the AI assistant.
+2. Decisions made based on the responses from Dolphin 3.0.
+3. Consequences of following the instructions or interactions performed with Dolphin 3.0.
 
-**Ao utilizar este projeto, o usuário assume TODA, e QUALQUER responsabilidade pelo uso do código e do modelo de IA, concordando em isentar o autor de qualquer responsabilidade legal, ética ou de segurança relacionada ao uso do software.**
+**By using this project, the user assumes FULL and ANY responsibility for the use of the code and the AI model, agreeing to indemnify the author from any legal, ethical, or security responsibility related to the use of the software.**
 
 ---
 
-### **📜 Licença 📜**
+### **📜 License 📜**
 
-Este projeto é licenciado sob a Licença MIT.
+This project is licensed under the **MIT License**.
