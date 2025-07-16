@@ -1,4 +1,4 @@
-Dolphin (3.0) - Chat API
+Dolphin (3.0) - Chat Interface
 
 Este projeto em Python integra o Dolphin 3.0 em uma interface gráfica de chat, permitindo interação conversacional com o modelo de IA.
 
